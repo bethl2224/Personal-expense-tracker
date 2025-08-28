@@ -1,0 +1,13 @@
+# connect to postgres sql
+psql -U Postgres
+
+# connect to the expense database
+\c expense
+
+
+
+# docker compose
+
+psql -U myuser -d expense
+
+\dt command to view all table
