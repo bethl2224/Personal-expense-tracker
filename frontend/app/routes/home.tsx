@@ -1,6 +1,5 @@
 import { Balance, BottomNav, HeaderBar } from "components";
 import type { Route } from "./+types/home";
-import { categories } from "components/transactionForm";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,12 +9,13 @@ export function meta({}: Route.MetaArgs) {
 }
 
 const BASEURL = "http://localhost:3000/api";
+const userId = "1";
 
 export async function loader() {
   try {
-    const transactions = await fetch(`${BASEURL}/transactions/users/1`);
+    const transactions = await fetch(`${BASEURL}/transactions/users/${userId}`);
     const categories = await fetch(`${BASEURL}/categories`);
-    const user = await fetch(`${BASEURL}/users/1`);
+    const user = await fetch(`${BASEURL}/users/${userId}`);
 
     console.log("reload loader", transactions);
 

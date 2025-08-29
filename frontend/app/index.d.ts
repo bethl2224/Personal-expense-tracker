@@ -21,7 +21,7 @@ declare interface Category {
 }
 
 declare interface Transaction {
-  transaction_id: number;
+  // transaction_id: number;
   user_id: number;
   category_id: number;
   amount: number;
@@ -54,4 +54,14 @@ declare interface TransactionItemProps {
 declare interface TransactionFormProps {
   open: boolean;
   handleClose: (value: boolean) => void;
+}
+
+declare interface TransactionMap {
+  date: string;
+  categoryId: number;
+  amount: number;
+}
+
+declare interface TransactionWeekHashMap {
+  [key: string]: number;
 }
