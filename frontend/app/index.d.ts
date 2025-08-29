@@ -55,3 +55,13 @@ declare interface TransactionFormProps {
   open: boolean;
   handleClose: (value: boolean) => void;
 }
+
+declare interface TransactionMap {
+  date: string;
+  categoryId: number;
+  amount: number;
+}
+
+declare interface TransactionWeekHashMap {
+  [key: string]: number;
+}

@@ -1,3 +1,30 @@
+import type { LargeNumberLike } from "crypto";
+
+const weekHashamp = {
+  1: "Mon",
+  2: "Tues",
+  3: "Weds",
+  4: "Thurs",
+  5: "Fri",
+  6: "Sat",
+  7: "Sun",
+};
+
+const monthHashmap = {
+  1: "Jan",
+  2: "Feb",
+  3: "March",
+  4: "April",
+  5: "May",
+  6: "June",
+  7: "July",
+  8: "Aug",
+  9: "Sept",
+  10: "Oct",
+  11: "Nov",
+  12: "Dec",
+};
+
 export function getTodaysDate(): string {
   const today = new Date();
   const month = String(today.getMonth() + 1).padStart(2, "0");
@@ -61,7 +88,7 @@ export function sortTransactionsByDate(
 // make sure use UTC method to get the standard mongth
 export function sortTransactionWeekly(transactions: Transaction[]) {
   const transactionMap: { [key: string]: number } = {};
-  const transactionUnAggregated: { [key: string]: any[] } = {};
+  const transactionUnAggregated: { [key: string]: TransactionMap[] } = {};
   for (const transaction of transactions) {
     const date = new Date(transaction.date);
     console.log(date.getUTCMonth());
@@ -79,7 +106,7 @@ export function sortTransactionWeekly(transactions: Transaction[]) {
     transactionUnAggregated[key].push({
       date: transaction.date,
       amount: transaction.amount,
-      category: transaction.category_id,
+      categoryId: transaction.category_id,
     });
   }
 
@@ -99,13 +126,22 @@ export function sortTransactionWeekly(transactions: Transaction[]) {
 }
 
 // TODO: more weekly analsys
-export function getWeeklyAnalysis(transactionMap) {
-  const transactionHashMap = {};
+export function getWeeklyAnalysis(transactionMap: TransactionMap[]) {
+  const transactionHashMap: TransactionWeekHashMap = {
+    Mon: 0,
+    Tues: 0,
+    Weds: 0,
+    Thu: 0,
+    Fri: 0,
+    Sat: 0,
+    Sun: 0,
+  };
   console.log("pass in transaction map", transactionMap);
   for (const transaction of transactionMap) {
     const dateOfWeek = new Date(transaction.date)
       .toLocaleString("en-US", { weekday: "short" })
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/^\w/, (c) => c.toUpperCase());
     if (!transactionHashMap[dateOfWeek]) {
       transactionHashMap[dateOfWeek] = 0;
     }
@@ -131,14 +167,33 @@ export function getMostRecentWeek(transactionMap: {
 
 // transaction of past 12 months
 export function sortTransactionMonthly(transactions: Transaction[]) {
-  const transactionMap: { [key: string]: Transaction[] } = {};
+  const transactionMap: { [key: string]: TransactionMap[] } = {
+    Jan: [],
+    Feb: [],
+    March: [],
+    April: [],
+    May: [],
+    June: [],
+    July: [],
+    Aug: [],
+    Sept: [],
+    Oct: [],
+    Nov: [],
+    Dec: [],
+  };
+
   for (const transaction of transactions) {
     const date = new Date(transaction.date);
-    const month = (date.getUTCMonth() + 1).toString();
+    const month = monthHashmap[Number(date.getUTCMonth() + 1)];
+
     if (!transactionMap[month]) {
       transactionMap[month] = [];
     }
-    transactionMap[month].push(transaction);
+    transactionMap[month].push({
+      date: transaction.date,
+      amount: transaction.amount,
+      categoryId: transaction.category_id,
+    });
   }
 
   // Sort months in ascending order
@@ -147,7 +202,7 @@ export function sortTransactionMonthly(transactions: Transaction[]) {
   );
 
   // Create new sorted map
-  const sortedTransactionMap: { [key: string]: Transaction[] } = {};
+  const sortedTransactionMap: { [key: string]: TransactionMap[] } = {};
   sortedMonths.forEach((month) => {
     sortedTransactionMap[month] = transactionMap[month];
   });
