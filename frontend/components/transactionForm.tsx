@@ -7,7 +7,6 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import { useState } from "react";
-import { generateRandomId } from "~/utils/calculate";
 import { useRevalidator } from "react-router";
 
 const BASEURL = "http://localhost:3000/api";
@@ -77,11 +76,14 @@ const TransactionForm = ({ open, handleClose }: TransactionFormProps) => {
       // frontend make sure the data is format correctly to pass in the data
       const transaction: Transaction = {
         ...newExpense,
-        category_id: category_id,
+        category_id: category_id || 1,
         user_id: user_id,
-        transaction_id: generateRandomId(10), // generate a random 10 id
+        // database will generate
+        // transaction_id: generateRandomId(10), // generate a random 10 id
         date: date,
       };
+
+      console.log("final data: ", transaction);
 
       // create Transaction
       const response = await fetch(`${BASEURL}/transactions`, {
@@ -100,8 +102,6 @@ const TransactionForm = ({ open, handleClose }: TransactionFormProps) => {
       } else {
         console.error("Error in creating transaction");
       }
-
-      console.log("final data: ", transaction);
     } catch (error) {
       console.log("Error creating expense");
       setLoading(false);

@@ -55,3 +55,102 @@ export function sortTransactionsByDate(
     return dateB.getTime() - dateA.getTime();
   });
 }
+
+// transaction of most recent week
+
+// make sure use UTC method to get the standard mongth
+export function sortTransactionWeekly(transactions: Transaction[]) {
+  const transactionMap: { [key: string]: number } = {};
+  const transactionUnAggregated: { [key: string]: any[] } = {};
+  for (const transaction of transactions) {
+    const date = new Date(transaction.date);
+    console.log(date.getUTCMonth());
+    const key =
+      (date.getUTCMonth() + 1).toString() +
+      "-" +
+      Math.floor(date.getUTCDate() / 7).toString() +
+      "-" +
+      date.getUTCFullYear().toString();
+    if (!transactionMap[key]) {
+      transactionMap[key] = 0;
+      transactionUnAggregated[key] = [];
+    }
+    transactionMap[key] += transaction.amount;
+    transactionUnAggregated[key].push({
+      date: transaction.date,
+      amount: transaction.amount,
+      category: transaction.category_id,
+    });
+  }
+
+  const recentWeekTransaction = getMostRecentWeek(transactionUnAggregated);
+  console.log(recentWeekTransaction);
+
+  const transactionWeeklyAnalysis = getWeeklyAnalysis(
+    transactionUnAggregated[recentWeekTransaction]
+  );
+
+  console.log("weekly ⭐️", transactionWeeklyAnalysis);
+
+  return {
+    transactionWeeklyMap: transactionMap,
+    transactionMostRecentWeek: transactionWeeklyAnalysis,
+  };
+}
+
+// TODO: more weekly analsys
+export function getWeeklyAnalysis(transactionMap) {
+  const transactionHashMap = {};
+  console.log("pass in transaction map", transactionMap);
+  for (const transaction of transactionMap) {
+    const dateOfWeek = new Date(transaction.date)
+      .toLocaleString("en-US", { weekday: "short" })
+      .toLowerCase();
+    if (!transactionHashMap[dateOfWeek]) {
+      transactionHashMap[dateOfWeek] = 0;
+    }
+    transactionHashMap[dateOfWeek] += transaction.amount;
+  }
+
+  return transactionHashMap;
+}
+// Get the most recent week - key with biggest value
+export function getMostRecentWeek(transactionMap: {
+  [key: string]: any[];
+}): string {
+  return Object.keys(transactionMap).reduce((a, b) => {
+    const [monthA, weekA, yearA] = a.split("-").map(Number);
+    const [monthB, weekB, yearB] = b.split("-").map(Number);
+    if (yearA > yearB) return a;
+    if (yearA < yearB) return b;
+    if (monthA > monthB) return a;
+    if (monthA < monthB) return b;
+    return weekA > weekB ? a : b;
+  });
+}
+
+// transaction of past 12 months
+export function sortTransactionMonthly(transactions: Transaction[]) {
+  const transactionMap: { [key: string]: Transaction[] } = {};
+  for (const transaction of transactions) {
+    const date = new Date(transaction.date);
+    const month = (date.getUTCMonth() + 1).toString();
+    if (!transactionMap[month]) {
+      transactionMap[month] = [];
+    }
+    transactionMap[month].push(transaction);
+  }
+
+  // Sort months in ascending order
+  const sortedMonths = Object.keys(transactionMap).sort(
+    (a, b) => parseInt(a) - parseInt(b)
+  );
+
+  // Create new sorted map
+  const sortedTransactionMap: { [key: string]: Transaction[] } = {};
+  sortedMonths.forEach((month) => {
+    sortedTransactionMap[month] = transactionMap[month];
+  });
+
+  return sortedTransactionMap;
+}

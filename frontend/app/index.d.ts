@@ -21,7 +21,7 @@ declare interface Category {
 }
 
 declare interface Transaction {
-  transaction_id: number;
+  // transaction_id: number;
   user_id: number;
   category_id: number;
   amount: number;
